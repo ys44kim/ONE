@@ -542,5 +542,17 @@ void OperationValidator::visit(const operation::While &node)
   OP_REQUIRES(node.getInputs().size() == node.getOutputs().size());
 }
 
+void OperationValidator::visit(const operation::RoPE &node)
+{
+  const auto input_index{node.getInputs().at(operation::RoPE::Input::INPUT)};
+  const auto sin_index{node.getInputs().at(operation::RoPE::Input::SIN_TABLE)};
+  const auto cos_index{node.getInputs().at(operation::RoPE::Input::COS_TABLE)};
+  const auto output_index{node.getOutputs().at(operation::RoPE::Output::OUTPUT)};
+
+  OP_REQUIRES(isValidType(input_index, {DataType::FLOAT32, DataType::INT32, DataType::INT64,
+                                        DataType::QUANT_UINT8_ASYMM, DataType::QUANT_INT8_ASYMM}));
+  OP_REQUIRES(isSameType(input_index, output_index));
+}
+
 } // namespace ir
 } // namespace onert

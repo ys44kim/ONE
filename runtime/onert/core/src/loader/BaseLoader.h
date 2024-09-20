@@ -164,6 +164,7 @@ private:
   void loadReshape(const Operator *op, ir::Graph &subg);
   void loadResizeBilinear(const Operator *op, ir::Graph &subg);
   void loadResizeNearestNeighbor(const Operator *op, ir::Graph &subg);
+  void loadRoPE(const Operator *op, ir::Graph &subg);  
   void loadSoftmax(const Operator *op, ir::Graph &subg);
   void loadSpaceToDepth(const Operator *op, ir::Graph &subg);
   void loadSplit(const Operator *op, ir::Graph &subg);
@@ -1119,7 +1120,8 @@ void BaseLoader<LoaderDomain>::loadCustom(const Operator *op, ir::Graph &subg)
     FusedBatchNorm,
     StatelessRandomUniform,
     Erf,
-    DetectionPostProcess
+    DetectionPostProcess,
+    RoPE
   };
 
   // Mapping from custom op name string to BuiltinOP enum
@@ -1134,6 +1136,7 @@ void BaseLoader<LoaderDomain>::loadCustom(const Operator *op, ir::Graph &subg)
     {"StatelessRandomUniform", BuiltinOP::StatelessRandomUniform},
     {"Erf", BuiltinOP::Erf},
     {"TFLite_Detection_PostProcess", BuiltinOP::DetectionPostProcess},
+    {"RoPE", BuiltinOP::RoPE},
   };
 
   try
@@ -1172,6 +1175,9 @@ void BaseLoader<LoaderDomain>::loadCustom(const Operator *op, ir::Graph &subg)
       case BuiltinOP::DetectionPostProcess:
         loadDetectionPostProcess(op, subg);
         break;
+      case BuiltinOP::RoPE:
+        loadRoPE(op, subg);
+        break;        
       default:
         throw std::runtime_error{
           "Loader: Custom OP map is defined but operation loader function is not defined"};
@@ -1453,6 +1459,30 @@ void BaseLoader<LoaderDomain>::loadUnidirectionalSequenceLSTM(const Operator *op
 
   std::unique_ptr<ir::operation::LSTM> new_op(new ir::operation::LSTM(inputs, outputs, param));
   subg.addOperation(std::move(new_op));
+}
+
+emplate <typename LoaderDomain>
+void BaseLoader<LoaderDomain>::loadRoPE(const Operator *op, ir::Graph &subg)
+{
+  ir::operation::RoPELayer::Param param;
+  if (op->custom_options() == nullptr)
+  {
+    throw std::runtime_error{"loadRoPE: empty option"};
+  }
+  else
+  {
+    const auto attr_map = getCustomOpAttrMap(op);
+    // param.is_training = attr_map["is_training"].AsBool();
+    // param.epsilon = attr_map["epsilon"].AsFloat();
+    // param.data_format = attr_map["data_format"].ToString();
+  }
+
+  const auto fbn = loadOperationTo<ir::operation::RoPELayer>(op, subg, param);
+
+  if (fbn->getInputs().size() != 5)
+  {
+    throw std::runtime_error{"RoPELayer: NYI input - only support five inputs"};
+  }
 }
 
 template <typename LoaderDomain>

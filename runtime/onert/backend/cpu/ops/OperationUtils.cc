@@ -308,6 +308,20 @@ std::vector<int32_t> getReducerAxes(const IPortableTensor *axes)
   return ret;
 }
 
+nnfw::cker::RoPEMode getRoPEMode(ir::RoPEMode ir_rope_mode)
+{
+  switch (ir_rope_mode)
+  {
+    case ir::RoPEMode::GPT_NEOX:
+      return nnfw::cker::RoPEMode::kGptNeox;
+    case ir::RoPEMode::GPT_J:
+      return nnfw::cker::RoPEMode::kGptJ;
+    default:
+      throw std::runtime_error("Wrong rope mode.");
+      break;
+  }
+}
+
 } // namespace ops
 } // namespace cpu
 } // namespace backend

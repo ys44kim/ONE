@@ -63,6 +63,12 @@ enum class ComparisonOpType
   LessEqual
 };
 
+enum class RoPEMode
+{
+  GPT_NEOX = 0,
+  GPT_J = 1,
+};
+
 struct PaddingValues
 {
   int16_t width;
@@ -403,6 +409,11 @@ struct PadParams
 {
   int32_t data[8];
   int32_t rank;
+};
+
+struct RoPEParams
+{
+  RoPEMode mode;
 };
 
 enum class Order

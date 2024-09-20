@@ -169,6 +169,8 @@ nnfw::cker::PaddingType getPaddingType(ir::PaddingType ir_padding_type);
 
 std::vector<int32_t> getReducerAxes(const IPortableTensor *axes);
 
+nnfw::cker::RoPEMode getRoPEMode(ir::operation::RoPE::RoPEMode ir_rope_mode);
+
 template <typename T> const T *getBuffer(const IPortableTensor *tensor)
 {
   return reinterpret_cast<const T *>(tensor->buffer());
