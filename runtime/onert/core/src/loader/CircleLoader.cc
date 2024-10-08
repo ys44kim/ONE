@@ -70,6 +70,7 @@ protected:
   void loadInstanceNorm(const Operator *op, ir::Graph &subg);
   void loadBCQFullyConnected(const Operator *op, ir::Graph &subg);
   void loadBCQGather(const Operator *op, ir::Graph &subg);
+  void loadRoPE(const Operator *op, ir::Graph &subg);
 
 public:
   using BaseLoader::BaseLoader;
@@ -96,6 +97,20 @@ protected:
       return ir::DataType::QUANT_GGML_Q8_0;
 
     return BaseLoader::tensorTypeToDataType(type);
+  }
+
+  ir::operation::RoPE::RoPEMode convertRoPEMode(const circle::RoPEMode mode)
+  {
+    switch (mode)
+    {
+      case circle::RoPEMode::RoPEMode_GPT_NEOX:
+        return ir::operation::RoPE::RoPEMode::GPT_NEOX;
+      case circle::RoPEMode::RoPEMode_GPT_J:
+        return ir::operation::RoPE::RoPEMode::GPT_J;
+      default:
+        throw std::runtime_error(std::string("Unsupported RoPE mode: ") +
+                                 std::to_string(static_cast<int>(mode)));
+    }
   }
 
 private:

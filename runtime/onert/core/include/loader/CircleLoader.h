@@ -18,6 +18,7 @@
 #define __ONERT_LOADER_CIRCLE_LOADER_H__
 
 #include "ir/Graph.h"
+#include "ir/operation/RoPE.h"
 
 #include <memory>
 
