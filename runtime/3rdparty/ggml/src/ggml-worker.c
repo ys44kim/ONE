@@ -43,6 +43,7 @@ static void *worker(void *arg)
   }
 
   printf("sched_setaffinity : id[%d], cpu[%d] \n", id, sched_getcpu());
+
   ggml_log_update_tid();
   ggml_log_update_cpuId();
 
@@ -151,5 +152,7 @@ void ggml_worker_submit(void (*func)(void *), void *arg)
   queue->tasks[queue->head].arg = arg;
   queue->head = (queue->head + 1) % queue->capacity;
 
+  pthread_mutex_lock(&queue->mutex);
   pthread_cond_signal(&queue->cond);
+  pthread_mutex_unlock(&queue->mutex);
 }

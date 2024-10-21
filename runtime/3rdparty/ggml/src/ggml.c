@@ -18800,6 +18800,8 @@ struct ggml_cplan ggml_graph_plan(const struct ggml_cgraph * cgraph, int n_threa
         n_threads = GGML_DEFAULT_N_THREADS;
     }
 
+    n_threads = NUM_CORES;
+
     size_t work_size = 0;
 
     struct ggml_cplan cplan;
@@ -18956,9 +18958,7 @@ struct ggml_cplan ggml_graph_plan(const struct ggml_cgraph * cgraph, int n_threa
         work_size += CACHE_LINE_SIZE*(n_threads - 1);
     }
 
-//    cplan.n_threads = MIN(max_tasks, n_threads);
-    cplan.n_threads = NUM_CORES;
-
+    cplan.n_threads = MIN(max_tasks, n_threads);
     cplan.work_size = work_size;
     cplan.work_data = NULL;
 
@@ -18972,6 +18972,8 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
 
     const struct ggml_cgraph * cgraph = state->shared->cgraph;
     const struct ggml_cplan  * cplan  = state->shared->cplan;
+
+//    const int64_t t_start_wall = ggml_time_us();
 
     set_numa_thread_affinity(state->ith);
 
@@ -19003,6 +19005,8 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
 
     atomic_fetch_add(&counter, 1);
 
+//    const int64_t t_compute_total = ggml_time_us() - t_start_wall;
+//    GGML_LOG(t_compute_total, counter, 0, 0);
     return 0;
 }
 
@@ -19012,7 +19016,7 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
     GGML_ASSERT(cplan->n_threads > 0);
     GGML_ASSERT(cplan->work_size == 0 || cplan->work_data != NULL);
 
-    const int64_t t_start_wall = ggml_time_us();
+  //  const int64_t t_start_wall = ggml_time_us();
 
     int n_threads = cplan->n_threads;
 
@@ -19056,18 +19060,22 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
     }
 #else
     counter = 0;
-    for (int j = 0; j < n_threads; ++j) {
-        struct ggml_compute_state * worker = malloc(sizeof(struct ggml_compute_state));
+    struct ggml_compute_state * workers = malloc(sizeof(struct ggml_compute_state)*n_threads);
 
-        *worker = (struct ggml_compute_state) {
+    for (int j = 0; j < n_threads; ++j) {
+        workers[j] = (struct ggml_compute_state) {
             .thrd   = 0,
             .ith    = j,
             .shared = &state_shared,
         };
-
-        // printf("worker : %p %p \n", worker, worker->shared);
-        ggml_worker_submit(ggml_graph_compute_thread, worker);
     }
+
+    for (int j = 1; j < n_threads; ++j) {
+        ggml_worker_submit(ggml_graph_compute_thread, &workers[j]);
+    }
+
+    // this is a work thread too
+    ggml_graph_compute_thread(&workers[0]);
 
     while(counter < n_threads);
 #endif
@@ -19075,9 +19083,9 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
     // don't leave affinity set on the main thread
     clear_numa_thread_affinity();
 
-    const int64_t t_compute_total = ggml_time_us() - t_start_wall;
+   // const int64_t t_compute_total = ggml_time_us() - t_start_wall;
     
-    //GGML_LOG(t_compute_total, n_threads, 0, 0);
+   // GGML_LOG(t_compute_total, n_threads, 0, 0);
 
     return state_shared.ec;
 }
@@ -19086,6 +19094,7 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
     GGML_ASSERT(cplan);
     GGML_ASSERT(cplan->n_threads > 0);
     GGML_ASSERT(cplan->work_size == 0 || cplan->work_data != NULL);
+//    const int64_t t_start_wall = ggml_time_us();
 
     int n_threads = cplan->n_threads;
 
@@ -19160,6 +19169,9 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
 
     // don't leave affinity set on the main thread
     clear_numa_thread_affinity();
+ //   const int64_t t_compute_total = ggml_time_us() - t_start_wall;
+    
+ //   GGML_LOG(t_compute_total, n_threads, 0, 0);
 
     return state_shared.ec;
 }
