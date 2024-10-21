@@ -88,6 +88,22 @@ public:
     return dur_evt;
   }
 
+  std::unique_ptr<UserDurationEvent> build(const EventCollector::UserEvent &evt_collected,
+                                           const std::string &ph) const
+  {
+    auto dur_evt = std::make_unique<UserDurationEvent>();
+
+    dur_evt->ph = ph;
+    dur_evt->ts = _ts;
+    dur_evt->tracing_ctx = evt_collected.tracing_ctx;
+
+    dur_evt->session_index = evt_collected.session_index;
+
+    dur_evt->user_desc = evt_collected.user_desc;
+
+    return dur_evt;
+  }
+
 private:
   std::string _ts;
 };
@@ -156,3 +172,4 @@ template <typename EventT> void EventCollector::onEvent(const EventT &event)
 // template instantiation
 template void EventCollector::onEvent<EventCollector::SubgEvent>(const SubgEvent &event);
 template void EventCollector::onEvent<EventCollector::OpSeqEvent>(const OpSeqEvent &event);
+template void EventCollector::onEvent<EventCollector::UserEvent>(const UserEvent &event);

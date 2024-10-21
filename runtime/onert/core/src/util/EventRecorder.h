@@ -59,6 +59,11 @@ struct OpSeqDurationEvent : public DurationEvent
   std::string op_name;
 };
 
+struct UserDurationEvent : public DurationEvent
+{
+  std::string user_desc;
+};
+
 struct CounterEvent : public Event
 {
   std::string name; // name of event

@@ -36,6 +36,7 @@ public:
 
   struct SubgEvent;
   struct OpEvent;
+  struct UserEvent;
 
   class EventVisitor
   {
@@ -96,6 +97,18 @@ public:
       backend.assign(a_backend);
       op_index = a_op_index;
       op_name.assign(a_op_name);
+    }
+  };
+
+  struct UserEvent : public Event
+  {
+    std::string user_desc;
+
+    UserEvent(const onert::util::TracingCtx *a_tracing_ctx, Edge a_edge,
+              const std::string a_user_desc)
+      : Event(a_tracing_ctx, a_edge, 0)
+    {
+      user_desc.assign(a_user_desc);
     }
   };
 

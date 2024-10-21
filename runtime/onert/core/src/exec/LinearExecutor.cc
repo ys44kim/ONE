@@ -19,6 +19,8 @@
 #include "ruy/profiler/instrumentation.h"
 #endif
 
+#include <thread>
+
 namespace onert
 {
 namespace exec
@@ -42,12 +44,20 @@ void LinearExecutor::executeImpl(const ExecutionObservee &subject)
 
       auto &fn_seq = code.fn_seq;
 
+      subject.notifyUserBegin("initRunning");
       fn_seq->initRunning();
+      subject.notifyUserEnd("initRunning");
 
       bool handle_dynamic_tensor =
         _lowered_graph->getHasDynamicTensor(code.op_ind) || hasDynamicInput();
+
+      subject.notifyUserBegin("ShapeInfer");
       fn_seq->enableDynamicShapeInferer(handle_dynamic_tensor);
+      subject.notifyUserEnd("ShapeInfer");
+
+      subject.notifyUserBegin("run");
       fn_seq->run();
+      subject.notifyUserEnd("run");
 
       subject.notifyJobEnd(this, profiling_subg_index, code.op_ind, backend);
     }

@@ -47,6 +47,9 @@ public:
                       const backend::Backend *backend) const;
   void notifyJobEnd(IExecutor *executor, ir::SubgraphIndex subg_ind, ir::OperationIndex op_ind,
                     const backend::Backend *backend) const;
+  void notifyUserBegin(const std::string user_desc) const;
+  void notifyUserEnd(const std::string user_desc) const;
+
   bool isEmpty() const { return _observers.size() == 0; }
 
 private:

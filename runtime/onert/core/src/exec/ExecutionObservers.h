@@ -48,11 +48,16 @@ public:
 
   virtual void handleJobBegin(IExecutor *, ir::SubgraphIndex, ir::OperationIndex,
                               const backend::Backend *) = 0;
+
+  virtual void handleUserBegin(std::string) { return; }
+
   virtual void handleJobEnd(IExecutor *, ir::SubgraphIndex, ir::OperationIndex,
                             const backend::Backend *) = 0;
 
   /// @brief Invoked just after model (not individual operation) execution ends
   virtual void handleSubgraphEnd(ir::SubgraphIndex) { return; }
+
+  virtual void handleUserEnd(std::string) { return; }
 
   virtual ObserverType type() const = 0;
 
@@ -109,9 +114,13 @@ public:
   void handleSubgraphBegin(ir::SubgraphIndex) override;
   void handleJobBegin(IExecutor *, ir::SubgraphIndex, ir::OperationIndex,
                       const backend::Backend *) override;
+  void handleUserBegin(std::string) override;
+
   void handleJobEnd(IExecutor *, ir::SubgraphIndex, ir::OperationIndex,
                     const backend::Backend *) override;
   void handleSubgraphEnd(ir::SubgraphIndex) override;
+  void handleUserEnd(std::string) override;
+
   ObserverType type() const override { return ObserverType::TRACING; }
 
 private:

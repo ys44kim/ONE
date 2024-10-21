@@ -63,6 +63,10 @@ std::string getLabel(const DurationEvent &evt)
       return subg_label + " " + op_label;
     }
   }
+  else if (dynamic_cast<const UserDurationEvent *>(&evt))
+  {
+    return "User";
+  }
   else // SubgEvent
     return "Graph";
 }

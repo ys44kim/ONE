@@ -175,6 +175,17 @@ void TracingObserver::handleSubgraphEnd(ir::SubgraphIndex subg_ind)
     EventCollector::SubgEvent{_tracing_ctx, EventCollector::Edge::END, subg_ind.value()});
 }
 
+void TracingObserver::handleUserBegin(const std::string user_desc)
+{
+  _collector.onEvent(
+    EventCollector::UserEvent{_tracing_ctx, EventCollector::Edge::BEGIN, user_desc});
+}
+
+void TracingObserver::handleUserEnd(const std::string user_desc)
+{
+  _collector.onEvent(EventCollector::UserEvent{_tracing_ctx, EventCollector::Edge::END, user_desc});
+}
+
 } // namespace exec
 
 } // namespace onert

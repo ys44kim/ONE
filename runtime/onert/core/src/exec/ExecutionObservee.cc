@@ -90,5 +90,21 @@ void ExecutionObservee::notifyJobEnd(IExecutor *executor, ir::SubgraphIndex subg
   }
 }
 
+void ExecutionObservee::notifyUserBegin(const std::string user_desc) const
+{
+  for (auto &&o : _observers)
+  {
+    o->handleUserBegin(user_desc);
+  }
+}
+
+void ExecutionObservee::notifyUserEnd(const std::string user_desc) const
+{
+  for (auto &&o : _observers)
+  {
+    o->handleUserEnd(user_desc);
+  }
+}
+
 } // namespace exec
 } // namespace onert

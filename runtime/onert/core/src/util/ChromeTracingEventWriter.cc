@@ -137,11 +137,17 @@ std::string getOpLabel(const OpSeqDurationEvent &evt)
   return "@" + std::to_string(evt.op_index) + " " + evt.op_name;
 }
 
+std::string getUserLabel(const UserDurationEvent &evt) { return "$" + evt.user_desc; }
+
 std::string getLabel(const DurationEvent &evt)
 {
   if (auto evt_ptr = dynamic_cast<const OpSeqDurationEvent *>(&evt))
   {
     return getOpLabel(*evt_ptr);
+  }
+  else if (auto evt_ptr = dynamic_cast<const UserDurationEvent *>(&evt))
+  {
+    return getUserLabel(*evt_ptr);
   }
   else // SubgDurationEvent
   {
