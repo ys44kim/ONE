@@ -322,6 +322,20 @@ nnfw::cker::RoPEMode getRoPEMode(ir::operation::RoPE::RoPEMode rope_mode)
   }
 }
 
+nnfw::cker::WeightsType getWeightsType(OperandType type)
+{
+  switch (type)
+  {
+    case OperandType::QUANT_GGML_Q4_0:
+      return nnfw::cker::WeightsType::KQuantGgmlQ4;
+    case OperandType::QUANT_GGML_Q8_0:
+      return nnfw::cker::WeightsType::KQuantGgmlQ8;
+    default:
+      throw std::runtime_error("Wrong data type");
+      break;
+  }
+}
+
 } // namespace ops
 } // namespace cpu
 } // namespace backend

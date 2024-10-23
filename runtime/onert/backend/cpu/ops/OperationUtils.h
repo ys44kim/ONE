@@ -172,6 +172,8 @@ std::vector<int32_t> getReducerAxes(const IPortableTensor *axes);
 
 nnfw::cker::RoPEMode getRoPEMode(ir::operation::RoPE::RoPEMode rope_mode);
 
+nnfw::cker::WeightsType getWeightsType(OperandType data_type);
+
 template <typename T> const T *getBuffer(const IPortableTensor *tensor)
 {
   return reinterpret_cast<const T *>(tensor->buffer());

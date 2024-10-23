@@ -84,6 +84,12 @@ enum class BroadcastableOpCategory : uint8_t
   kGenericBroadcast,          // Fall-back.
 };
 
+enum class WeightsType
+{
+  KQuantGgmlQ4, // 4bit quantization, 32 block, 16bit delta
+  KQuantGgmlQ8, // 8bit quantization, 32 block, 16bit delta
+};
+
 struct PoolParams
 {
   PaddingValues padding_values{0, 0};
@@ -273,6 +279,7 @@ struct FullyConnectedParams
   bool lhs_cacheable;
   bool rhs_cacheable;
   // FullyConnectedWeightsFormat weights_format;
+  WeightsType weights_type;
 };
 
 struct L2NormParams

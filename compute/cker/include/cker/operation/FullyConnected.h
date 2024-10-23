@@ -27,6 +27,7 @@
 #include "cker/Utils.h"
 #include "cker/TensorUtils.h"
 #include "cker/neon/neon_check.h"
+#include "cker/operation/reference/FullyConneted.h"
 
 namespace nnfw
 {

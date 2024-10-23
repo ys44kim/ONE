@@ -179,37 +179,62 @@ void FullyConnectedLayer::fullyConnectedSparseWeight()
     throw std::runtime_error{"FullyConnected: unsupported sparsity"};
 }
 
+// void FullyConnectedLayer::fullyConnectedGGMLWeight()
+// {
+//   if (_bias)
+//     throw std::runtime_error{"FullyConnected: GGML weights format does not support bias yet."};
+
+//   // convert tensor
+//   auto input = getGGMLTensor(_input);
+//   auto weights = getGGMLTensor(_weights);
+//   auto output = getGGMLTensor(_output);
+//   {
+//     output.op = GGML_OP_MUL_MAT;
+//     output.src[0] = &weights;
+//     output.src[1] = &input;
+//   }
+//   auto *nodes = &output;
+
+//   // create graph
+//   struct ggml_cgraph graph;
+//   {
+//     memset(&graph, 0, sizeof(graph));
+//     graph.n_nodes = 1;
+//     graph.nodes = &nodes;
+//   }
+
+//   // get cplan
+//   auto cplan = ggml_graph_plan(&graph, _external_context->maxNumThreads());
+//   std::vector<uint8_t> buf(cplan.work_size);
+//   cplan.work_data = buf.data();
+
+//   // compute
+//   ggml_graph_compute(&graph, &cplan);
+// }
+
 void FullyConnectedLayer::fullyConnectedGGMLWeight()
 {
   if (_bias)
     throw std::runtime_error{"FullyConnected: GGML weights format does not support bias yet."};
 
-  // convert tensor
-  auto input = getGGMLTensor(_input);
-  auto weights = getGGMLTensor(_weights);
-  auto output = getGGMLTensor(_output);
-  {
-    output.op = GGML_OP_MUL_MAT;
-    output.src[0] = &weights;
-    output.src[1] = &input;
-  }
-  auto *nodes = &output;
+  nnfw::cker::FullyConnectedParams op_params;
+  float output_activation_min = 0;
+  float output_activation_max = 0;
+  CalculateActivationRange(_activation, &output_activation_min, &output_activation_max);
 
-  // create graph
-  struct ggml_cgraph graph;
-  {
-    memset(&graph, 0, sizeof(graph));
-    graph.n_nodes = 1;
-    graph.nodes = &nodes;
-  }
+  op_params.activation = convertActivationType(_activation);
+  op_params.float_activation_min = output_activation_min;
+  op_params.float_activation_max = output_activation_max;
+  // TODO Set both cachables as false when training
+  op_params.lhs_cacheable = _weights->is_constant();
+  op_params.rhs_cacheable = _input->is_constant();
 
-  // get cplan
-  auto cplan = ggml_graph_plan(&graph, _external_context->maxNumThreads());
-  std::vector<uint8_t> buf(cplan.work_size);
-  cplan.work_data = buf.data();
+  op_params.weights_type = getWeightsType(_weights->data_type());
 
-  // compute
-  ggml_graph_compute(&graph, &cplan);
+  nnfw::cker::reference::FullyConnected(op_params, getShape(_input), getBuffer<float>(_input),
+                                        getShape(_weights), getBuffer<float>(_weights),
+                                        getShape(_bias), _bias ? getBuffer<float>(_bias) : nullptr,
+                                        getShape(_output), getBuffer<float>(_output));
 }
 
 void FullyConnectedLayer::fullyConnected16x1Float32()
@@ -253,9 +278,9 @@ void FullyConnectedLayer::configure(const IPortableTensor *input, const IPortabl
 #endif
   _external_context = external_context;
 
-  if (_weights->data_type() == OperandType::QUANT_GGML_Q4_0 ||
-      _weights->data_type() == OperandType::QUANT_GGML_Q8_0)
-    _external_context->initGgmlContext();
+  // if (_weights->data_type() == OperandType::QUANT_GGML_Q4_0 ||
+  //     _weights->data_type() == OperandType::QUANT_GGML_Q8_0)
+  //   _external_context->initGgmlContext();
 }
 
 void FullyConnectedLayer::run()

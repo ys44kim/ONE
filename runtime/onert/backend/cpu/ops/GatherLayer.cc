@@ -21,6 +21,8 @@
 
 #include <cker/operation/Gather.h>
 
+#include <iostream>
+
 namespace onert
 {
 namespace backend
@@ -117,6 +119,7 @@ void GatherLayer::runByGGMLQuantInputType()
   std::vector<uint8_t> buf(cplan.work_size);
   cplan.work_data = buf.data();
 
+  std::cout << "GatherLayer::runByGGMLQuantInputType: work_size=" << cplan.work_size << "\n";
   // compute
   ggml_graph_compute(&graph, &cplan);
 }
