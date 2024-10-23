@@ -43,7 +43,17 @@ inline void FullyConnected(const FullyConnectedParams &params, const Shape &inpu
   UNUSED_RELEASE(bias_data);
   UNUSED_RELEASE(output_data);
 
-  std::cout << "GGML FullyConneted" << std::endl;
+  switch(params.weights_type)
+  {
+    case WeightsType::KQuantGgmlQ4:
+      std::cout << "GGML FullyConneted : 4bit quantization" << std::endl;
+      break;
+    case WeightsType::KQuantGgmlQ8:
+      std::cout << "GGML FullyConneted : 8bit quantization" << std::endl;
+      break;
+    default:
+      std::cout << "GGML FullyConneted : unsupoorted weight type" << std::endl;
+  }
 }
 
 } // namespace reference
