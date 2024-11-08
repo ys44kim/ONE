@@ -24,10 +24,11 @@ void ggml_log_write(int32_t line, int64_t arg0, int64_t arg1, int64_t arg2, int6
 void ggml_log_update_tid(void);
 void ggml_log_update_cpuId(void);
 
-#define GGML_LOG(arg0, arg1, arg2, arg3) \
-do {\
-  ggml_log_write(__LINE__, (int64_t)(arg0), (int64_t)(arg1), (int64_t)(arg2), (int64_t)(arg3)); \
-}while(0);
+//#define GGML_LOG(arg0, arg1, arg2, arg3) \
+//do {\
+//  ggml_log_write(__LINE__, (int64_t)(arg0), (int64_t)(arg1), (int64_t)(arg2), (int64_t)(arg3)); \
+//}while(0);
 
+#define GGML_LOG(arg0, arg1, arg2, arg3)
 
 #endif // __GGML_LOG_H__

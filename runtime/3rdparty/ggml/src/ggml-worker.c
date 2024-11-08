@@ -19,6 +19,9 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <errno.h>
+#include <sched.h>
+#include <string.h>
 
 #include "ggml-worker.h"
 #include "ggml-log.h"
@@ -26,6 +29,23 @@
 static TaskQueue *gQueue[NUM_CORES];
 static pthread_t gThreads[NUM_CORES];
 static pthread_mutex_t gGlobalMutex;
+
+// static void setSchedule(void)
+// {
+//   struct sched_param param;
+
+//   memset(&param, 0, sizeof(param));
+//   if (sched_getparam(0, &param) < 0) {
+//       printf("Failed to sched_getparam\n");
+//       return;
+//   }
+
+//   param.sched_priority = 1;
+//   if (sched_setscheduler(0, SCHED_RR, &param) == -1) {
+//       printf("error sched_setscheduler(SCHED_RR) errno:%d", errno);
+//       return;
+//   }
+// }
 
 static void *worker(void *arg)
 {
@@ -41,6 +61,8 @@ static void *worker(void *arg)
   {
       printf("sched_setaffinity err cpu %d \n", sched_getcpu());
   }
+
+  // setSchedule();
 
   printf("sched_setaffinity : id[%d], cpu[%d] \n", id, sched_getcpu());
 

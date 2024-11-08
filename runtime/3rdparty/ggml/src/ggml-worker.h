@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define NUM_CORES 7
+#define NUM_CORES 4
 #define NUM_QUEUES 16
 
 typedef struct {
