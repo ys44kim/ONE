@@ -12457,7 +12457,7 @@ UseGgmlGemm1:;
         atomic_store(&params->shared->current_chunk, nth);
     }
 
-    ggml_barrier(params->shared);
+    //ggml_barrier(params->shared);
 
 #if GGML_USE_LLAMAFILE
     if (src1->type != vec_dot_type) {
@@ -12497,19 +12497,13 @@ UseGgmlGemm2:;
         num_rows_per_vec_dot = 1;
     }
 
-    // Now select a reasonable chunk size.
-    int chunk_size = 16;
-
-    // We need to step up the size if it's small
-    if (nr0 == 1 || nr1 == 1) {
-        chunk_size = 64;
-    }
-
     // distribute the work across the inner or outer loop based on which one is larger
     // The number of chunks in the 0/1 dim.
-    // CEIL(nr0/chunk_size)
-    int64_t nchunk0 = (nr0 + chunk_size - 1) / chunk_size;
-    int64_t nchunk1 = (nr1 + chunk_size - 1) / chunk_size;
+    int chunk0_size = (nr0 > nth) ? nr0 / nth : 1;
+    int chunk1_size = (nr1 > nth) ? nr1 / nth : 1;
+
+    int64_t nchunk0 = (nr0 + chunk0_size - 1) / chunk0_size;
+    int64_t nchunk1 = (nr1 + chunk1_size - 1) / chunk1_size;
 
     // If the chunking is poor for the number of threads on this setup, scrap the whole plan.  Re-chunk it by thread.
     //   Also, chunking by thread was measured to have perform better on NUMA systems.  See https://github.com/ggerganov/llama.cpp/pull/6915
@@ -18981,7 +18975,7 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
             state->shared->ec = GGML_STATUS_ABORTED;
         }
 
-        ggml_barrier(state->shared);
+        //ggml_barrier(state->shared);
 
         if (state->shared->ec != GGML_STATUS_SUCCESS) {
             break;
