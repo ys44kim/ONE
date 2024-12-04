@@ -45,6 +45,7 @@ std::vector<uint8_t> quantData(const std::vector<float> &buf_val, const circle::
 {
   switch (type)
   {
+#if 0
     case circle::TensorType::TensorType_GGML_Q4_0:
     {
       size_t num_elems = buf_val.size();
@@ -56,6 +57,7 @@ std::vector<uint8_t> quantData(const std::vector<float> &buf_val, const circle::
       ggml_quantize_chunk(GGML_TYPE_Q4_0, buf_val.data(), buf.data(), 0, 1, num_elems, nullptr);
       return buf;
     }
+#endif
     default:
       throw std::runtime_error("Unsupported tensor type");
   }
