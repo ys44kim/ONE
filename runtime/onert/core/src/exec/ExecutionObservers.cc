@@ -131,6 +131,8 @@ TracingObserver::~TracingObserver()
       auto event_writer = EventWriter::get(_workspace_dir);
       event_writer->startToUse();
       event_writer->readyToFlush(std::move(_recorder));
+
+      _triggered = false; // reset trigger flag to avoid multiple write attempts
     }
   }
   catch (const std::exception &e)
